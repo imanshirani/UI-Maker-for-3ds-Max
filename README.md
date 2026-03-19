@@ -18,7 +18,7 @@
 
 Whether you are rigging a complex character, creating a control panel for a `tyFlow` simulation, or managing scene states, UI Maker handles the complex data wiring in the background.
 
-![UI Maker Screenshot](link_to_your_screenshot_here.png) *(Replace this with a cool screenshot or GIF of your tool in action!)*
+![UI Maker Screenshot](https://github.com/imanshirani/UI-Maker-for-3ds-Max/blob/main/screenshot/UIMAKER.png) 
 
 ---
 
