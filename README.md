@@ -82,7 +82,7 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 ## ☕ Support
 If this tool saves you hours of rigging time, consider supporting the development!
 
-<a href="https://paypal.me/YOUR_PAYPAL_LINK" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal"></a>
+<a href="https://www.paypal.com/donate/?hosted_button_id=LAMNRY6DDWDC4" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal"></a>
 
 ---
-*Developed with ❤️ by [Iman Shirani (Espadan)] for the 3ds Max Community.*
+*Developed with ❤️ by [Iman Shirani] for the 3ds Max Community.*
