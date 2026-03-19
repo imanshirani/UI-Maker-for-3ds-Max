@@ -1,6 +1,6 @@
 <div align="center">
   <h1>🎨 UI Maker for 3ds Max</h1>
-  <p><strong>A Next-Gen, Visual UI Builder and Rigging Tool for Autodesk 3ds Max</strong></p>
+  <p><strong>A Next-Gen, Visual UI Builder for Autodesk 3ds Max</strong></p>
 
 
 [![Donate ❤️](https://img.shields.io/badge/Donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=LAMNRY6DDWDC4)
@@ -16,7 +16,7 @@
 ## 📖 Overview
 **UI Maker** is a powerful Python/PySide6 tool designed for 3ds Max Technical Directors (TDs) and 3D Artists. It allows you to visually build custom user interfaces (Panels, Sliders, Dropdowns, etc.) and wire them directly to 3ds Max scene properties **without writing a single line of code**.
 
-Whether you are rigging a complex character, creating a control panel for a `tyFlow` simulation, or managing scene states, UI Maker handles the complex data wiring in the background.
+Creating a control panel for a `tyFlow` simulation, or managing scene states, UI Maker handles the complex data wiring in the background.
 
 ![UI Maker Screenshot](https://github.com/imanshirani/UI-Maker-for-3ds-Max/blob/main/screenshot/UIMAKER.png) 
 
@@ -81,7 +81,7 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 ---
 
 ## ☕ Support
-If this tool saves you hours of rigging time, consider supporting the development!
+If this tool saves you hours, consider supporting the development!
 
 <a href="https://www.paypal.com/donate/?hosted_button_id=LAMNRY6DDWDC4" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal"></a>
 
