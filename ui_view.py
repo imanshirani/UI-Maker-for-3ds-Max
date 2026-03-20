@@ -41,7 +41,7 @@ class SettingsDialog(QtWidgets.QDialog):
         lbl_title = QtWidgets.QLabel("UI Maker")
         lbl_title.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {style.COLOR_ACCENT};")
         lbl_title.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_info = QtWidgets.QLabel("Version 0.003 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
+        lbl_info = QtWidgets.QLabel("Version 0.004 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
         lbl_info.setStyleSheet(style.APP_INFO_LABEL)
         lbl_info.setAlignment(QtCore.Qt.AlignCenter)
         
@@ -240,9 +240,11 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             ("🎚️ Slider", "Numerical Slider"),
             ("🔢 Spinner", "Spinner (Exact Number)"),
             ("🔤 Label", "Plain Text"),
-            ("✅ Check", "Checkbox"),
-            ("🔘 Radio", "Radio Button (Single Select)"),
+            ("📝 TextBlock", "Multi-line Description Text"),
             ("📋 Dropdown", "Dropdown Menu (List)"),
+            ("✅ CheckBox", "Checkbox"),
+            ("☑️ Checklist", "Multiple Checkboxes"),
+            ("🔘 Radio", "Radio Button (Single Select)"),            
             ("🎨 Color", "Color Picker")
         ]
 
@@ -457,16 +459,22 @@ class UIMakerWindow(QtWidgets.QDockWidget):
     def get_ui_data(self):
         ui_data = {
             "ui_name": "UI Maker",
-            "version": "0.001",
+            "version": "0.004", 
             "elements": []
         }
         
         def serialize_node(node):
             
+            # --- 1. TextBlock ---
             title = ""
-            if hasattr(node, 'title_edit'): title = node.title_edit.text()
-            elif hasattr(node, 'tab_name_edit'): title = node.tab_name_edit.text()
+            if getattr(node, 'elem_type', "") == "TextBlock" and hasattr(node, 'text_edit'):
+                title = node.text_edit.toPlainText()
+            elif hasattr(node, 'title_edit'): 
+                title = node.title_edit.text()
+            elif hasattr(node, 'tab_name_edit'): 
+                title = node.tab_name_edit.text()
             
+            # --- 2. Particpate Properties ---
             data = {
                 "type": getattr(node, 'elem_type', node.__class__.__name__),
                 "title": title,
@@ -477,8 +485,14 @@ class UIMakerWindow(QtWidgets.QDockWidget):
                 "multi_links": getattr(node, 'multi_links', {}), 
                 "children": []
             }
+
+            # --- 3. spinner---
+            if hasattr(node, 'spn_min'):
+                data["min"] = node.spn_min.value()
+                data["max"] = node.spn_max.value()
+                data["default"] = node.spn_def.value()
             
-            
+            # --- 4.Group / Tab (DropContainer) ---
             if hasattr(node, 'drop_container'):
                 container = node.drop_container
                 for i in range(container.main_layout.count()):
@@ -487,7 +501,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
                     if w and (hasattr(w, 'elem_type') or w.__class__.__name__ in ['UIGroupNode', 'UITabNode']):
                         data["children"].append(serialize_node(w))
                         
-            
+            # --- 5. Tabs Save---
             elif hasattr(node, 'tab_widget'):
                 data["tabs"] = []
                 for i in range(node.tab_widget.count()):
@@ -528,7 +542,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             if "Tab" in elem_type: 
                 new_node = UITabNode(parent_canvas=self)
             elif "Group" in elem_type: 
-                new_node = UIGroupNode("New Group", parent_canvas=self)
+                new_node = UIGroupNode(item_data.get("title", "New Group"), parent_canvas=self)
             else: 
                 new_node = UIElementNode(elem_type, item_data.get("title", elem_type), parent_canvas=self)
             
@@ -557,7 +571,11 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             # Expression
             if hasattr(new_node, 'expr_edit') and item_data.get("expression"):
                 new_node.expr_edit.setText(item_data.get("expression"))
-                
+
+            #TextBlock
+            if elem_type == "TextBlock" and hasattr(new_node, 'text_edit'):
+                new_node.text_edit.setText(item_data.get("title", "Your long description..."))
+
             # 4. Min/Max/Default
             if hasattr(new_node, 'spn_min'):
                 new_node.spn_min.setValue(item_data.get("min", 0.0))
@@ -869,6 +887,29 @@ class MaxRadioGroup(QtWidgets.QWidget):
 
     def _on_clicked(self, btn_id):
         self.valueChanged.emit(btn_id)
+
+class MaxCheckGroup(QtWidgets.QWidget):
+    itemStateChanged = QtCore.Signal(int, bool) 
+
+    def __init__(self, items=["Item 1", "Item 2"], parent=None):
+        super(MaxCheckGroup, self).__init__(parent)
+        self.layout = QtWidgets.QHBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.checkboxes = []
+        self.update_items(items)
+
+    def update_items(self, items):
+        for cb in self.checkboxes:
+            self.layout.removeWidget(cb)
+            cb.deleteLater()
+        self.checkboxes.clear()
+
+        for i, text in enumerate(items):
+            cb = QtWidgets.QCheckBox(text)            
+            cb.stateChanged.connect(lambda state, idx=i: self.itemStateChanged.emit(idx, state == 2))
+            self.layout.addWidget(cb)
+            self.checkboxes.append(cb)
+
 # ==========================================
 #            Element Node
 # ==========================================
@@ -898,7 +939,7 @@ class UIElementNode(QtWidgets.QWidget):
         
         self.title_edit = QtWidgets.QLineEdit(title)
         self.title_edit.setMinimumWidth(80)
-        self.title_edit.setMaximumWidth(150)
+        self.title_edit.setMaximumWidth(400)
         
         self.content_layout = QtWidgets.QHBoxLayout()
         self.content_layout.addWidget(self.title_edit) 
@@ -945,8 +986,12 @@ class UIElementNode(QtWidgets.QWidget):
         if "Slider" in self.elem_type:
             self.ui_widget = QtWidgets.QSlider(QtCore.Qt.Horizontal)
             self.content_layout.addWidget(self.ui_widget)
-        elif "Check" in self.elem_type:
+        elif "CheckBox" in self.elem_type:
             self.ui_widget = QtWidgets.QCheckBox() 
+            self.content_layout.addWidget(self.ui_widget)
+            self.content_layout.addStretch()
+        elif "Checklist" in self.elem_type:
+            self.ui_widget = MaxCheckGroup(["Item 1", "Item 2"]) 
             self.content_layout.addWidget(self.ui_widget)
             self.content_layout.addStretch()
         elif "Radio" in self.elem_type:
@@ -971,6 +1016,12 @@ class UIElementNode(QtWidgets.QWidget):
             self.title_edit.setMaximumWidth(9999)
             self.title_edit.setAlignment(QtCore.Qt.AlignCenter)
             self.ui_widget = None
+        elif "TextBlock" in self.elem_type:
+            self.title_edit.hide() 
+            self.ui_widget = QtWidgets.QLabel("Your long description or instructions go here...")
+            self.ui_widget.setWordWrap(True)
+            self.ui_widget.setStyleSheet(f"color: {style.COLOR_TEXT_LIGHT}; padding: 5px; line-height: 1.5;")
+            self.content_layout.addWidget(self.ui_widget)
         elif "Separator" in self.elem_type:
             self.title_edit.hide()            
             self.ui_widget = QtWidgets.QWidget()
@@ -1010,34 +1061,29 @@ class UIElementNode(QtWidgets.QWidget):
             self.spn_max.valueChanged.connect(lambda v: self.update_widget_range())
             self.spn_def.valueChanged.connect(lambda v: self.apply_default_value())
             
-            
             self.update_widget_range()
             self.apply_default_value()
 
-        if any(x in self.elem_type for x in ["Slider", "Spinner", "Dropdown", "Radio"]):
-            
+        if any(x in self.elem_type for x in ["Slider", "Spinner", "CheckBox", "Color"]):
             if not hasattr(self, 'options_edit'):
                 self.options_edit = QtWidgets.QLineEdit("Target 1, Target 2")
                 self.options_edit.setStyleSheet(style.PARAM_EDIT_STYLE)
                 self.options_edit.textChanged.connect(self.update_list_items)
                 
-               
                 lbl_opt = QtWidgets.QLabel("Targets (Names):")
                 top_grid.addWidget(lbl_opt, 1, 0)
                 top_grid.addWidget(self.options_edit, 1, 1, 1, 5)
             
-            #Pick
             self.multi_links_widget = QtWidgets.QWidget()
             self.multi_links_layout = QtWidgets.QVBoxLayout(self.multi_links_widget)
             self.multi_links_layout.setContentsMargins(0, 10, 0, 0)
             main_drawer_lay.addWidget(self.multi_links_widget)
             
-            #
             initial_items = [i.strip() for i in self.options_edit.text().split(',') if i.strip()]
             self.build_multi_links_ui(initial_items)
             
-        # radio button
-        elif "Dropdown" in self.elem_type or "Radio" in self.elem_type:
+        # ---Dropdown Radi and checklist Content ---
+        elif any(x in self.elem_type for x in ["Dropdown", "Radio", "Checklist"]):
             self.options_edit = QtWidgets.QLineEdit("Item 1, Item 2")
             self.options_edit.setStyleSheet(style.PARAM_EDIT_STYLE)
             self.options_edit.textChanged.connect(self.update_list_items)
@@ -1045,7 +1091,6 @@ class UIElementNode(QtWidgets.QWidget):
             top_grid.addWidget(QtWidgets.QLabel("Options:"), 0, 0, 1, 1)
             top_grid.addWidget(self.options_edit, 0, 1, 1, 5)
             
-           
             self.multi_links_widget = QtWidgets.QWidget()
             self.multi_links_layout = QtWidgets.QVBoxLayout(self.multi_links_widget)
             self.multi_links_layout.setContentsMargins(0, 10, 0, 0)
@@ -1053,9 +1098,19 @@ class UIElementNode(QtWidgets.QWidget):
             
             self.build_multi_links_ui(["Item 1", "Item 2"])
 
+        # ---TextBlock Content ---
+        if "TextBlock" in self.elem_type:
+            self.text_edit = QtWidgets.QTextEdit("Your long description or instructions go here...")
+            self.text_edit.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; color: {style.COLOR_TEXT}; border: 1px solid {style.COLOR_BORDER};")
+            self.text_edit.setFixedHeight(60)           
+            self.text_edit.textChanged.connect(lambda: self.ui_widget.setText(self.text_edit.toPlainText()) if self.ui_widget else None)
+            
+            top_grid.addWidget(QtWidgets.QLabel("Content:"), 0, 0)
+            top_grid.addWidget(self.text_edit, 0, 1, 1, 5)
+
+        # --- Main Link & Expression ---
         
-        if "Label" not in self.elem_type and "Separator" not in self.elem_type:
-            # Link
+        if "Label" not in self.elem_type and "Separator" not in self.elem_type and "TextBlock" not in self.elem_type:
             row_link = top_grid.rowCount()
             self.param_edit = QtWidgets.QLineEdit()
             self.param_edit.setPlaceholderText("Select from tree and Pick ->")
@@ -1066,7 +1121,6 @@ class UIElementNode(QtWidgets.QWidget):
             self.btn_pick.setStyleSheet(style.BTN_ACTION)
             self.btn_pick.clicked.connect(self.pick_parameter_from_tree)
 
-            # ---Disconnect ---
             self.btn_clear_link = QtWidgets.QPushButton("🔗X")
             self.btn_clear_link.setFixedSize(38, 28)
             self.btn_clear_link.setToolTip("Disconnect Link")
@@ -1078,7 +1132,6 @@ class UIElementNode(QtWidgets.QWidget):
             top_grid.addWidget(self.btn_pick, row_link, 4)
             top_grid.addWidget(self.btn_clear_link, row_link, 5) 
 
-            # ---Expression ---
             self.expr_edit = QtWidgets.QLineEdit("") 
             self.expr_edit.setPlaceholderText("Use 'x' as input (e.g., x*10 or sin(x))")
             self.expr_edit.setStyleSheet(style.PARAM_EDIT_STYLE)
@@ -1147,6 +1200,10 @@ class UIElementNode(QtWidgets.QWidget):
                 self.ui_widget.addItems(items)
                 self.ui_widget.blockSignals(False)
             elif isinstance(self.ui_widget, MaxRadioGroup):
+                self.ui_widget.blockSignals(True)
+                self.ui_widget.update_items(items)
+                self.ui_widget.blockSignals(False)
+            elif isinstance(self.ui_widget, MaxCheckGroup):
                 self.ui_widget.blockSignals(True)
                 self.ui_widget.update_items(items)
                 self.ui_widget.blockSignals(False)
@@ -1247,6 +1304,8 @@ class UIElementNode(QtWidgets.QWidget):
             self.ui_widget.currentIndexChanged.connect(lambda v: self.update_max_parameter(v + 1)) 
         elif isinstance(self.ui_widget, MaxColorPicker): 
             self.ui_widget.colorChanged.connect(self.update_max_parameter)
+        elif isinstance(self.ui_widget, MaxCheckGroup): 
+            self.ui_widget.itemStateChanged.connect(lambda idx, state: self.update_max_parameter(state, index=idx))
 
         if hasattr(self, 'spn_min'):
             self.spn_min.valueChanged.connect(lambda v: self.update_widget_range())
@@ -1290,29 +1349,34 @@ class UIElementNode(QtWidgets.QWidget):
             
             return x
         
-    def update_max_parameter(self, value):
+    def update_max_parameter(self, value, index=None): 
         try:
-            
             final_value = self._calculate_expression(value)
-            
             with pymxs.undo(False):
                 #Multi-Link
                 if self.multi_links:
                     
-                    if "Dropdown" in self.elem_type or "Radio" in self.elem_type:
+                    # ---Checklist ---
+                    if "Checklist" in self.elem_type and index is not None:
+                        items = list(self.multi_link_edits.keys())
+                        if index < len(items):
+                            item_name = items[index]
+                            link = self.multi_links.get(item_name)
+                            if link:
+                                self._apply_to_max(link["handle"], link["prop"], final_value)
+                    # --------------------------------
+                    
+                    elif "Dropdown" in self.elem_type or "Radio" in self.elem_type:
                         items = list(self.multi_link_edits.keys())
                         selected_idx = value - 1 
                         for i, item_name in enumerate(items):
                             link = self.multi_links.get(item_name)
                             if link:
-                                
                                 self._apply_to_max(link["handle"], link["prop"], (i == selected_idx))
-                    
                     
                     else:
                         for link in self.multi_links.values():
                             self._apply_to_max(link["handle"], link["prop"], final_value)
-                
                 
                 elif self.linked_handle and self.linked_prop:
                     self._apply_to_max(self.linked_handle, self.linked_prop, final_value)

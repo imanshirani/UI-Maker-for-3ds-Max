@@ -91,6 +91,25 @@ QScrollBar::handle:vertical {{
 QScrollBar::handle:vertical:hover {{
     background: {COLOR_ACCENT};
 }}
+
+QCheckBox, QRadioButton {{
+        color: {COLOR_TEXT};
+        spacing: 6px;
+    }}
+    QCheckBox::indicator, QRadioButton::indicator {{
+        width: 14px;
+        height: 14px;
+        background-color: {COLOR_BG_DARK};
+        border: 1px solid {COLOR_BORDER_LIGHT};
+        border-radius: 3px;
+    }}
+    QRadioButton::indicator {{
+        border-radius: 7px; 
+    }}
+    QCheckBox::indicator:checked, QRadioButton::indicator:checked {{
+        background-color: {COLOR_ACCENT};
+        border: 1px solid {COLOR_ACCENT};
+    }}
 """
 
 DARK_THEME = MAIN_STYLE
@@ -304,3 +323,4 @@ QWidget {{
     border-radius: 1px;
 }}
 """
+
