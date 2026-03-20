@@ -40,7 +40,7 @@ class SettingsDialog(QtWidgets.QDialog):
         lbl_title = QtWidgets.QLabel("UI Maker")
         lbl_title.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {style.COLOR_ACCENT};")
         lbl_title.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_info = QtWidgets.QLabel("Version 0.002 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
+        lbl_info = QtWidgets.QLabel("Version 0.003 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
         lbl_info.setStyleSheet(style.APP_INFO_LABEL)
         lbl_info.setAlignment(QtCore.Qt.AlignCenter)
         
@@ -231,11 +231,12 @@ class UIMakerWindow(QtWidgets.QDockWidget):
 
         tools = [
             ("📑 Tab", "Create New Tab"),
-            ("📦 Group", "Create Group"),
+            ("📦 Group", "Create Group"),            
+            ("➖ Separator", "Horizontal Line Divider"),
             ("🎚️ Slider", "Numerical Slider"),
-            ("✅ Check", "Checkbox"),
             ("🔢 Spinner", "Spinner (Exact Number)"),
             ("🔤 Label", "Plain Text"),
+            ("✅ Check", "Checkbox"),
             ("🔘 Radio", "Radio Button (Single Select)"),
             ("📋 Dropdown", "Dropdown Menu (List)"),
             ("🎨 Color", "Color Picker")
@@ -420,20 +421,13 @@ class UIMakerWindow(QtWidgets.QDockWidget):
         self.is_edit_mode = self.mode_btn.isChecked()
         if self.is_edit_mode:
             self.mode_btn.setText("🛠 Edit Mode")
-            self.mode_btn.setStyleSheet(f"""
-                QPushButton {{
-                    background-color: #F57C00;
-                    color: {style.COLOR_TEXT_LIGHT};
-                    font-weight: bold;
-                    border: 1px solid #E65100;
-                    border-radius: 3px;
-                    padding: 4px;
-                }}
-            """)
+            self.mode_btn.setStyleSheet(style.BTN_EDIT_MODE) 
             self.left_panel.show()
             self.btn_save.show() 
-            self.btn_load.show() 
-            self.canvas_widget.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; border: 2px dashed #F57C00; border-radius: 5px;")
+            self.btn_load.show()
+            self.btn_save_scene.show()
+            
+            self.canvas_widget.setStyleSheet(style.CANVAS_EDIT_STYLE) # فراخوانی استایل 1px از فایل استایل
             
             for node in self.nodes_list:
                 node.set_edit_mode(True)
@@ -443,7 +437,9 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             self.left_panel.hide()
             self.btn_save.hide() 
             self.btn_load.hide() 
-            self.canvas_widget.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; border: 1px solid {style.COLOR_BORDER}; border-radius: 5px;")
+            self.btn_save_scene.hide()
+            
+            self.canvas_widget.setStyleSheet(style.CANVAS_USER_STYLE) # فراخوانی استایل از فایل استایل
             
             for node in self.nodes_list:
                 node.set_edit_mode(False)
@@ -695,26 +691,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
                 data = json.load(f)
             self.load_from_dict(data)
 
-    def toggle_mode(self):
-        self.is_edit_mode = self.mode_btn.isChecked()
-        if self.is_edit_mode:
-            self.mode_btn.setText("🛠 Edit Mode")
-            self.mode_btn.setStyleSheet("background-color: #F57C00; color: white; font-weight: bold; border-radius: 3px; padding: 4px;")
-            self.left_panel.show()
-            self.btn_save.show()
-            self.btn_load.show()
-            self.btn_save_scene.show() 
-            self.canvas_widget.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; border: 2px dashed #F57C00; border-radius: 5px;")
-            for node in self.nodes_list: node.set_edit_mode(True)
-        else:
-            self.mode_btn.setText("🔒 User Mode")
-            self.mode_btn.setStyleSheet(style.BTN_ACTION)
-            self.left_panel.hide()
-            self.btn_save.hide()
-            self.btn_load.hide()
-            self.btn_save_scene.hide() 
-            self.canvas_widget.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; border: 1px solid {style.COLOR_BORDER}; border-radius: 5px;")
-            for node in self.nodes_list: node.set_edit_mode(False)
+    
 
 # ==========================================
 # Drag & Drop
@@ -990,6 +967,13 @@ class UIElementNode(QtWidgets.QWidget):
             self.title_edit.setMaximumWidth(9999)
             self.title_edit.setAlignment(QtCore.Qt.AlignCenter)
             self.ui_widget = None
+        elif "Separator" in self.elem_type:
+            self.title_edit.hide()            
+            self.ui_widget = QtWidgets.QWidget()
+            self.ui_widget.setFixedHeight(2)
+            self.ui_widget.setMinimumWidth(100)
+            self.ui_widget.setStyleSheet(style.SEPARATOR_STYLE)            
+            self.content_layout.addWidget(self.ui_widget)
             
         self.connect_ui_signals()
 
@@ -1008,8 +992,8 @@ class UIElementNode(QtWidgets.QWidget):
         # spinner slider
         if "Slider" in self.elem_type or "Spinner" in self.elem_type:
             self.spn_min = MaxSpinner(); self.spn_min.setMinimumWidth(30); self.spn_min.setRange(-999999, 999999); self.spn_min.setValue(0.0)
-            self.spn_max = MaxSpinner(); self.spn_min.setMinimumWidth(30); self.spn_max.setRange(-999999, 999999); self.spn_max.setValue(100.0)
-            self.spn_def = MaxSpinner(); self.spn_min.setMinimumWidth(30); self.spn_def.setRange(-999999, 999999); self.spn_def.setValue(50.0)
+            self.spn_max = MaxSpinner(); self.spn_max.setMinimumWidth(30); self.spn_max.setRange(-999999, 999999); self.spn_max.setValue(100.0)
+            self.spn_def = MaxSpinner(); self.spn_def.setMinimumWidth(30); self.spn_def.setRange(-999999, 999999); self.spn_def.setValue(50.0)
             
             top_grid.addWidget(QtWidgets.QLabel("Min:"), 0, 0)
             top_grid.addWidget(self.spn_min, 0, 1)
@@ -1017,6 +1001,14 @@ class UIElementNode(QtWidgets.QWidget):
             top_grid.addWidget(self.spn_max, 0, 3)
             top_grid.addWidget(QtWidgets.QLabel("Default:"), 0, 4)
             top_grid.addWidget(self.spn_def, 0, 5)
+
+            self.spn_min.valueChanged.connect(lambda v: self.update_widget_range())
+            self.spn_max.valueChanged.connect(lambda v: self.update_widget_range())
+            self.spn_def.valueChanged.connect(lambda v: self.apply_default_value())
+            
+            
+            self.update_widget_range()
+            self.apply_default_value()
 
         if any(x in self.elem_type for x in ["Slider", "Spinner", "Dropdown", "Radio"]):
             
@@ -1058,7 +1050,7 @@ class UIElementNode(QtWidgets.QWidget):
             self.build_multi_links_ui(["Item 1", "Item 2"])
 
         
-        if "Label" not in self.elem_type:
+        if "Label" not in self.elem_type and "Separator" not in self.elem_type:
             # Link
             row_link = top_grid.rowCount()
             self.param_edit = QtWidgets.QLineEdit()
@@ -1071,8 +1063,8 @@ class UIElementNode(QtWidgets.QWidget):
             self.btn_pick.clicked.connect(self.pick_parameter_from_tree)
 
             # ---Disconnect ---
-            self.btn_clear_link = QtWidgets.QPushButton("🔗×")
-            self.btn_clear_link.setFixedSize(30, 24)
+            self.btn_clear_link = QtWidgets.QPushButton("🔗X")
+            self.btn_clear_link.setFixedSize(38, 28)
             self.btn_clear_link.setToolTip("Disconnect Link")
             self.btn_clear_link.setStyleSheet(style.BTN_DELETE)
             self.btn_clear_link.clicked.connect(self.clear_main_link)
@@ -1129,8 +1121,8 @@ class UIElementNode(QtWidgets.QWidget):
             btn.clicked.connect(lambda checked=False, i_name=item: self.pick_multi_parameter(i_name))
 
             
-            btn_del = QtWidgets.QPushButton("✕")
-            btn_del.setFixedSize(24, 24)
+            btn_del = QtWidgets.QPushButton("🔗X")
+            btn_del.setFixedSize(38, 28)
             btn_del.setStyleSheet(style.BTN_DELETE)
             btn_del.clicked.connect(lambda checked=False, i_name=item: self.remove_single_link(i_name))
 
@@ -1262,6 +1254,16 @@ class UIElementNode(QtWidgets.QWidget):
             self.ui_widget.setRange(int(mini), int(maxi))
         elif isinstance(self.ui_widget, MaxSpinner):
             self.ui_widget.setRange(mini, maxi)
+
+    def apply_default_value(self):
+        if not self.ui_widget: return
+        val = self.spn_def.value()
+        
+        # بدون بلاک کردن سیگنال مقدار میدیم تا تغییر به مکس هم ارسال بشه
+        if isinstance(self.ui_widget, QtWidgets.QSlider):
+            self.ui_widget.setValue(int(val)) # اسلایدر فقط عدد صحیح می‌گیره
+        elif isinstance(self.ui_widget, MaxSpinner):
+            self.ui_widget.setValue(val)
 
     def _calculate_expression(self, x):
         
@@ -1428,10 +1430,10 @@ class UIGroupNode(QtWidgets.QWidget):
     def set_edit_mode(self, is_edit):
         self.edit_panel.setVisible(is_edit)
         if is_edit:
-            self.setStyleSheet(f"QWidget#UIGroupNode {{ border: 1px dashed {style.COLOR_ACCENT}; background-color: transparent; border-radius: 4px; }}")
+            self.setStyleSheet(f"QWidget#UIGroupNode {{ {style.CONTAINER_EDIT_STYLE} }}")
             self.title_edit.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; border: 1px solid {style.COLOR_BORDER}; color: {style.COLOR_TEXT}; border-radius: 2px;")
         else:
-            self.setStyleSheet("QWidget#UIGroupNode { border: none; background-color: transparent; }")
+            self.setStyleSheet(f"QWidget#UIGroupNode {{ {style.CONTAINER_USER_STYLE} }}")
 
     def delete_self(self):
         if self.parent_canvas and self in self.parent_canvas.nodes_list:
@@ -1547,10 +1549,10 @@ class UITabNode(QtWidgets.QWidget):
     def set_edit_mode(self, is_edit):
         self.edit_panel.setVisible(is_edit)
         if is_edit:
-            self.setStyleSheet(f"QWidget#UITabNode {{ border: 1px dashed {style.COLOR_ACCENT}; background-color: transparent; border-radius: 4px; }}")
+            self.setStyleSheet(f"QWidget#UITabNode {{ {style.CONTAINER_EDIT_STYLE} }}")
             self.tab_name_edit.setStyleSheet(f"background-color: {style.COLOR_BG_DARK}; border: 1px solid {style.COLOR_BORDER}; color: {style.COLOR_TEXT}; border-radius: 2px;")
         else:
-            self.setStyleSheet("QWidget#UITabNode { border: none; background-color: transparent; }")
+            self.setStyleSheet(f"QWidget#UITabNode {{ {style.CONTAINER_USER_STYLE} }}")
 
     def delete_self(self):
         if self.parent_canvas and self in self.parent_canvas.nodes_list:

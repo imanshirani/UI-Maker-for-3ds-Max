@@ -273,3 +273,34 @@ QPushButton:hover {{
 USER_MODE_WIDGET = "QWidget { border: none; background-color: transparent; }"
 EDIT_MODE_TITLE = f"background-color: {COLOR_BG_DARK}; border: 1px solid {COLOR_BORDER}; color: {COLOR_TEXT}; border-radius: 2px;"
 USER_MODE_TITLE = f"background-color: transparent; border: none; color: {COLOR_TEXT};"
+
+# --- (Canvas) ---
+CANVAS_EDIT_STYLE = f"background-color: {COLOR_BG_DARK}; border: 1px dashed #F57C00; border-radius: 5px;"
+CANVAS_USER_STYLE = f"background-color: {COLOR_BG_DARK}; border: 1px solid {COLOR_BORDER}; border-radius: 5px;"
+
+# --- (Group و Tab) ---
+CONTAINER_EDIT_STYLE = f"border: 1px dashed {COLOR_ACCENT}; background-color: transparent; border-radius: 4px;"
+CONTAINER_USER_STYLE = "border: none; background-color: transparent;"
+
+BTN_EDIT_MODE = f"""
+QPushButton {{
+    background-color: #F57C00;
+    color: {COLOR_TEXT_LIGHT};
+    font-weight: bold;
+    border: 1px solid #E65100;
+    border-radius: 3px;
+    padding: 4px;
+}}
+QPushButton:hover {{
+    background-color: #FB8C00; 
+}}
+"""
+
+# --- (Separator) ---
+SEPARATOR_STYLE = f"""
+QWidget {{
+    background-color: {COLOR_BORDER_DARK}; 
+    margin: 10px 5px; 
+    border-radius: 1px;
+}}
+"""
