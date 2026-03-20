@@ -70,13 +70,7 @@ Standard 3ds Max parameter exposure often hides complex plugin data. UI Maker fe
 ---
 
 ## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/issues).
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+Contributions, issues, and feature requests are welcome! Feel free to check the
 
 ---
 
