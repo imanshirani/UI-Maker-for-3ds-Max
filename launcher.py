@@ -1,7 +1,13 @@
 import sys
 import os
 import importlib
-from PySide6 import QtWidgets, QtCore
+
+# --- Change PySide ---
+try:
+    from PySide6 import QtWidgets, QtCore
+except ImportError:
+    from PySide2 import QtWidgets, QtCore
+
 import qtmax
 import pymxs
 

@@ -1,4 +1,8 @@
-from PySide6 import QtWidgets, QtCore, QtGui
+try:
+    from PySide6 import QtWidgets, QtCore, QtGui
+except ImportError:
+    from PySide2 import QtWidgets, QtCore, QtGui
+
 import style
 import importlib         
 importlib.reload(style)  
@@ -427,7 +431,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             self.btn_load.show()
             self.btn_save_scene.show()
             
-            self.canvas_widget.setStyleSheet(style.CANVAS_EDIT_STYLE) # فراخوانی استایل 1px از فایل استایل
+            self.canvas_widget.setStyleSheet(style.CANVAS_EDIT_STYLE) 
             
             for node in self.nodes_list:
                 node.set_edit_mode(True)
@@ -439,7 +443,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             self.btn_load.hide() 
             self.btn_save_scene.hide()
             
-            self.canvas_widget.setStyleSheet(style.CANVAS_USER_STYLE) # فراخوانی استایل از فایل استایل
+            self.canvas_widget.setStyleSheet(style.CANVAS_USER_STYLE) 
             
             for node in self.nodes_list:
                 node.set_edit_mode(False)
@@ -1259,9 +1263,9 @@ class UIElementNode(QtWidgets.QWidget):
         if not self.ui_widget: return
         val = self.spn_def.value()
         
-        # بدون بلاک کردن سیگنال مقدار میدیم تا تغییر به مکس هم ارسال بشه
+        
         if isinstance(self.ui_widget, QtWidgets.QSlider):
-            self.ui_widget.setValue(int(val)) # اسلایدر فقط عدد صحیح می‌گیره
+            self.ui_widget.setValue(int(val))
         elif isinstance(self.ui_widget, MaxSpinner):
             self.ui_widget.setValue(val)
 
