@@ -1,8 +1,5 @@
-try:
-    from PySide6 import QtWidgets, QtCore, QtGui
-except ImportError:
-    from PySide2 import QtWidgets, QtCore, QtGui
 
+from PySide6 import QtWidgets, QtCore, QtGui
 import style
 import importlib         
 importlib.reload(style)  
@@ -72,9 +69,12 @@ class SettingsDialog(QtWidgets.QDialog):
 # ==========================================
 class UIMakerWindow(QtWidgets.QDockWidget):
     def __init__(self, parent=None):
-        super().__init__("UI Maker", parent)
-        
-        self.setObjectName("UIMakerDockWidget") 
+        super().__init__() 
+        self.setWindowTitle("UI Maker")
+        if parent:
+            self.setParent(parent)
+            
+        self.setObjectName("UIMakerDockWidget")
         self.setAllowedAreas(QtCore.Qt.LeftDockWidgetArea | QtCore.Qt.RightDockWidgetArea)
 
         self.main_container = QtWidgets.QWidget()
