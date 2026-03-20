@@ -40,7 +40,7 @@ class SettingsDialog(QtWidgets.QDialog):
         lbl_title = QtWidgets.QLabel("UI Maker")
         lbl_title.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {style.COLOR_ACCENT};")
         lbl_title.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_info = QtWidgets.QLabel("Version 0.001\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
+        lbl_info = QtWidgets.QLabel("Version 0.002 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
         lbl_info.setStyleSheet(style.APP_INFO_LABEL)
         lbl_info.setAlignment(QtCore.Qt.AlignCenter)
         
@@ -470,6 +470,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             data = {
                 "type": getattr(node, 'elem_type', node.__class__.__name__),
                 "title": title,
+                "expression": node.expr_edit.text() if hasattr(node, 'expr_edit') else "x",
                 "linked_handle": getattr(node, 'linked_handle', None),
                 "linked_prop": getattr(node, 'linked_prop', None),
                 "options": getattr(node, 'options_edit').text() if hasattr(node, 'options_edit') else None, 
@@ -552,6 +553,10 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             
             if hasattr(new_node, 'options_edit') and item_data.get("options"):
                 new_node.options_edit.setText(item_data.get("options"))
+
+            # Expression
+            if hasattr(new_node, 'expr_edit') and item_data.get("expression"):
+                new_node.expr_edit.setText(item_data.get("expression"))
                 
             # 4. Min/Max/Default
             if hasattr(new_node, 'spn_min'):
@@ -1012,6 +1017,28 @@ class UIElementNode(QtWidgets.QWidget):
             top_grid.addWidget(self.spn_max, 0, 3)
             top_grid.addWidget(QtWidgets.QLabel("Default:"), 0, 4)
             top_grid.addWidget(self.spn_def, 0, 5)
+
+        if any(x in self.elem_type for x in ["Slider", "Spinner", "Dropdown", "Radio"]):
+            
+            if not hasattr(self, 'options_edit'):
+                self.options_edit = QtWidgets.QLineEdit("Target 1, Target 2")
+                self.options_edit.setStyleSheet(style.PARAM_EDIT_STYLE)
+                self.options_edit.textChanged.connect(self.update_list_items)
+                
+               
+                lbl_opt = QtWidgets.QLabel("Targets (Names):")
+                top_grid.addWidget(lbl_opt, 1, 0)
+                top_grid.addWidget(self.options_edit, 1, 1, 1, 5)
+            
+            #Pick
+            self.multi_links_widget = QtWidgets.QWidget()
+            self.multi_links_layout = QtWidgets.QVBoxLayout(self.multi_links_widget)
+            self.multi_links_layout.setContentsMargins(0, 10, 0, 0)
+            main_drawer_lay.addWidget(self.multi_links_widget)
+            
+            #
+            initial_items = [i.strip() for i in self.options_edit.text().split(',') if i.strip()]
+            self.build_multi_links_ui(initial_items)
             
         # radio button
         elif "Dropdown" in self.elem_type or "Radio" in self.elem_type:
@@ -1031,7 +1058,9 @@ class UIElementNode(QtWidgets.QWidget):
             self.build_multi_links_ui(["Item 1", "Item 2"])
 
         
-        if "Label" not in self.elem_type and "Dropdown" not in self.elem_type and "Radio" not in self.elem_type:
+        if "Label" not in self.elem_type:
+            # Link
+            row_link = top_grid.rowCount()
             self.param_edit = QtWidgets.QLineEdit()
             self.param_edit.setPlaceholderText("Select from tree and Pick ->")
             self.param_edit.setReadOnly(True)
@@ -1040,10 +1069,26 @@ class UIElementNode(QtWidgets.QWidget):
             self.btn_pick = QtWidgets.QPushButton("🎯 Pick")
             self.btn_pick.setStyleSheet(style.BTN_ACTION)
             self.btn_pick.clicked.connect(self.pick_parameter_from_tree)
+
+            # ---Disconnect ---
+            self.btn_clear_link = QtWidgets.QPushButton("🔗×")
+            self.btn_clear_link.setFixedSize(30, 24)
+            self.btn_clear_link.setToolTip("Disconnect Link")
+            self.btn_clear_link.setStyleSheet(style.BTN_DELETE)
+            self.btn_clear_link.clicked.connect(self.clear_main_link)
             
-            top_grid.addWidget(QtWidgets.QLabel("Link:"), 1, 0)
-            top_grid.addWidget(self.param_edit, 1, 1, 1, 4)
-            top_grid.addWidget(self.btn_pick, 1, 5)
+            top_grid.addWidget(QtWidgets.QLabel("Link:"), row_link, 0)
+            top_grid.addWidget(self.param_edit, row_link, 1, 1, 3)
+            top_grid.addWidget(self.btn_pick, row_link, 4)
+            top_grid.addWidget(self.btn_clear_link, row_link, 5) 
+
+            # ---Expression ---
+            self.expr_edit = QtWidgets.QLineEdit("") 
+            self.expr_edit.setPlaceholderText("Use 'x' as input (e.g., x*10 or sin(x))")
+            self.expr_edit.setStyleSheet(style.PARAM_EDIT_STYLE)
+            
+            top_grid.addWidget(QtWidgets.QLabel("Expression:"), row_link + 1, 0)
+            top_grid.addWidget(self.expr_edit, row_link + 1, 1, 1, 5)
 
         self.wrapper_layout.addWidget(self.settings_drawer)
         self.settings_drawer.hide()
@@ -1080,12 +1125,19 @@ class UIElementNode(QtWidgets.QWidget):
 
             btn = QtWidgets.QPushButton("🎯 Pick")
             btn.setStyleSheet(style.BTN_ACTION)
-        
+            btn.setFixedSize(60, 24) 
             btn.clicked.connect(lambda checked=False, i_name=item: self.pick_multi_parameter(i_name))
+
+            
+            btn_del = QtWidgets.QPushButton("✕")
+            btn_del.setFixedSize(24, 24)
+            btn_del.setStyleSheet(style.BTN_DELETE)
+            btn_del.clicked.connect(lambda checked=False, i_name=item: self.remove_single_link(i_name))
 
             row_lay.addWidget(lbl)
             row_lay.addWidget(edit)
             row_lay.addWidget(btn)
+            row_lay.addWidget(btn_del) 
             self.multi_links_layout.addWidget(row_w)
 
     def update_list_items(self, text):
@@ -1211,32 +1263,53 @@ class UIElementNode(QtWidgets.QWidget):
         elif isinstance(self.ui_widget, MaxSpinner):
             self.ui_widget.setRange(mini, maxi)
 
+    def _calculate_expression(self, x):
+        
+        expr = self.expr_edit.text().strip() if hasattr(self, 'expr_edit') else "x"
+        if expr == "x" or not expr:
+            return x
+        
+        try:
+            import math
+            
+            safe_dict = {
+                "x": x,
+                "sin": math.sin, "cos": math.cos, "tan": math.tan,
+                "pow": math.pow, "sqrt": math.sqrt, "pi": math.pi,
+                "abs": abs, "min": min, "max": max, "log": math.log
+            }
+            
+            return eval(expr, {"__builtins__": None}, safe_dict)
+        except Exception as e:
+            
+            return x
+        
     def update_max_parameter(self, value):
         try:
+            
+            final_value = self._calculate_expression(value)
+            
             with pymxs.undo(False):
-                
-                if "Dropdown" in self.elem_type or "Radio" in self.elem_type:
-                    items = []
-                    if isinstance(self.ui_widget, QtWidgets.QComboBox):
-                        items = [self.ui_widget.itemText(i) for i in range(self.ui_widget.count())]
+                #Multi-Link
+                if self.multi_links:
+                    
+                    if "Dropdown" in self.elem_type or "Radio" in self.elem_type:
+                        items = list(self.multi_link_edits.keys())
                         selected_idx = value - 1 
-                    elif isinstance(self.ui_widget, MaxRadioGroup):
-                        items = [btn.text() for btn in self.ui_widget.button_group.buttons()]
-                        selected_idx = value - 1
-                        
-                    for i, item_name in enumerate(items):
-                        if item_name in self.multi_links:
-                            link_data = self.multi_links[item_name]
-                            hndl, prp = link_data.get("handle"), link_data.get("prop")
-                            if hndl and prp:
-                            
-                                is_selected = (i == selected_idx)
-                                self._apply_to_max(hndl, prp, is_selected)
+                        for i, item_name in enumerate(items):
+                            link = self.multi_links.get(item_name)
+                            if link:
+                                
+                                self._apply_to_max(link["handle"], link["prop"], (i == selected_idx))
+                    
+                    
+                    else:
+                        for link in self.multi_links.values():
+                            self._apply_to_max(link["handle"], link["prop"], final_value)
                 
-                # single linke
-                else:
-                    if self.linked_handle and self.linked_prop:
-                        self._apply_to_max(self.linked_handle, self.linked_prop, value)
+                
+                elif self.linked_handle and self.linked_prop:
+                    self._apply_to_max(self.linked_handle, self.linked_prop, final_value)
                         
             rt.redrawViews()
         except Exception as e:
@@ -1263,6 +1336,22 @@ class UIElementNode(QtWidgets.QWidget):
             getattr(target, attr)[idx] = val
         else:
             setattr(target, last_part, val)
+
+    def clear_main_link(self):
+        
+        self.linked_handle = None
+        self.linked_prop = None
+        if hasattr(self, 'param_edit'):
+            self.param_edit.setText("")
+            self.param_edit.setPlaceholderText("Link Disconnected")
+
+    def remove_single_link(self, item_name):
+        
+        if item_name in self.multi_links:
+            del self.multi_links[item_name] 
+        
+        if item_name in self.multi_link_edits:
+            self.multi_link_edits[item_name].setText("")
 
 # ==========================================
 #            UIGroupNode

@@ -257,6 +257,18 @@ QWidget {{
     margin-top: 2px; 
 }}
 """
+BTN_DELETE = f"""
+QPushButton {{
+    color: #ff4444; 
+    background-color: rgba(255, 0, 0, 0.1); 
+    border: 1px solid #ff4444;
+    font-weight: bold;
+    border-radius: 3px;
+}}
+QPushButton:hover {{
+    background-color: rgba(255, 0, 0, 0.2);
+}}
+"""
 
 USER_MODE_WIDGET = "QWidget { border: none; background-color: transparent; }"
 EDIT_MODE_TITLE = f"background-color: {COLOR_BG_DARK}; border: 1px solid {COLOR_BORDER}; color: {COLOR_TEXT}; border-radius: 2px;"
