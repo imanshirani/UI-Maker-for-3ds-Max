@@ -1,5 +1,24 @@
 Changlog 
+03-20-2026
+# 🚀 UI Maker v0.003 (Open Beta)
 
+We are constantly refining UI Maker to be as stable, intuitive, and professional as possible. Version 0.003 brings a highly requested visual organization tool, critical crash preventions, and a much cleaner codebase architecture.
+
+### ✨ New Features
+* **Separator Tool (`➖ Separator`):** Added a new horizontal divider to the UI Toolbox. You can now visually separate and categorize your custom UI layouts, making complex rigs much easier to read and navigate.
+
+### 🛠️ Critical Bug Fixes & Stability
+* **Instant Default Value Sync:** Fixed a bug where `Min`, `Max`, and `Default` values for Spinners and Sliders were not immediately applied upon creation. UI widgets now accurately snap to their defined Default values the moment they are generated.
+* **Resolved Function Conflicts:** Cleaned up duplicate functions (e.g., overlapping `toggle_mode` methods) that were blocking UI styling updates from properly executing.
+
+### 💅 UI/UX & Architecture Polish
+* **Refined Edit Mode Interface:** Thinned down the main canvas dashed border from 2px to 1px for a cleaner, more modern workspace aesthetic that takes up less visual weight.
+* **Total Stylesheet Centralization (Code Refactoring):** Migrated all hard-coded visual properties (Group/Tab borders, Separator lines, and Edit Mode buttons) entirely out of the logic file (`ui_view.py`) and into a centralized `style.py` file. This ensures cleaner code and makes future theme updates effortless.
+
+---
+*Thank you to everyone testing the Beta! Please report any bugs or feature requests in the Issues tab.*
+
+---
 03-20-2026
 
 # 🚀 UI Maker v0.002 (Open Beta)
