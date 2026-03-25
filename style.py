@@ -127,6 +127,29 @@ QPushButton:hover {{
     color: {COLOR_TEXT_LIGHT};
 }}
 """
+SLIDER_STYLE = f"""
+QSlider::groove:horizontal {{
+    border: 1px solid {COLOR_BORDER};
+    height: 4px;
+    background: {COLOR_BG_DARK};
+    margin: 2px 0;
+    border-radius: 2px;
+}}
+
+QSlider::handle:horizontal {{
+    background: {COLOR_ACCENT};
+    border: 1px solid {COLOR_ACCENT};
+    width: 14px;
+    height: 14px;
+    margin: -6px 0;
+    border-radius: 7px; /* دایره‌ای شدن: نصفِ عرض/ارتفاع */
+}}
+
+QSlider::handle:horizontal:hover {{
+    background: {COLOR_ACCENT_HOVER};
+    border-color: {COLOR_ACCENT_HOVER};
+}}
+"""
 
 GROUP_BOX_HEADER = f"""
 QGroupBox {{

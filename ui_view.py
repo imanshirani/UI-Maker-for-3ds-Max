@@ -41,7 +41,7 @@ class SettingsDialog(QtWidgets.QDialog):
         lbl_title = QtWidgets.QLabel("UI Maker")
         lbl_title.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {style.COLOR_ACCENT};")
         lbl_title.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_info = QtWidgets.QLabel("Version 0.004 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
+        lbl_info = QtWidgets.QLabel("Version 0.005 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
         lbl_info.setStyleSheet(style.APP_INFO_LABEL)
         lbl_info.setAlignment(QtCore.Qt.AlignCenter)
         
@@ -111,6 +111,11 @@ class UIMakerWindow(QtWidgets.QDockWidget):
         self.btn_save_scene.clicked.connect(self.save_to_scene)
         self.btn_save_scene.hide() 
 
+        self.btn_clear_scene = QtWidgets.QPushButton("🗑️ Clear Max Data")
+        self.btn_clear_scene.setStyleSheet(style.BTN_DELETE)
+        self.btn_clear_scene.clicked.connect(self.clear_scene_data)
+        self.btn_clear_scene.hide()
+
         self.btn_load = QtWidgets.QPushButton("📂 Load .mui")
         self.btn_load.setStyleSheet(style.BTN_GITHUB)
         self.btn_load.clicked.connect(self.load_from_file)
@@ -131,6 +136,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
         self.header_layout.addStretch()
         
         self.header_layout.addWidget(self.btn_save_scene)
+        self.header_layout.addWidget(self.btn_clear_scene)
         self.header_layout.addWidget(self.btn_load)
         self.header_layout.addWidget(self.btn_save)
         self.header_layout.addWidget(self.mode_btn)
@@ -432,6 +438,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             self.btn_save.show() 
             self.btn_load.show()
             self.btn_save_scene.show()
+            self.btn_clear_scene.show()
             
             self.canvas_widget.setStyleSheet(style.CANVAS_EDIT_STYLE) 
             
@@ -444,6 +451,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             self.btn_save.hide() 
             self.btn_load.hide() 
             self.btn_save_scene.hide()
+            self.btn_clear_scene.hide()
             
             self.canvas_widget.setStyleSheet(style.CANVAS_USER_STYLE) 
             
@@ -656,6 +664,35 @@ class UIMakerWindow(QtWidgets.QDockWidget):
             rt.setSaveRequired(True)
             print("[UI Maker] Data injected! Please SAVE your Max scene now (Ctrl+S).")            
             QtWidgets.QMessageBox.warning(self, "Action Required", "Information injected into Max.\nPlease save the Max file now (Ctrl+S).")
+    
+    def clear_scene_data(self):
+        import os
+        
+        
+        val = rt.getUserProp(rt.rootNode, "UIMakerData")
+        if val == rt.undefined or val is None or str(val).strip() == "":
+            QtWidgets.QMessageBox.information(self, "Clean Scene", "There is no UI Maker data saved in this Max file.")
+            return
+            
+        #(Confirmation)
+        reply = QtWidgets.QMessageBox.question(self, 'Clear Data', 
+            "Are you sure you want to delete the UI Maker data from this Max file?\nThis action cannot be undone.",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+            
+        if reply == QtWidgets.QMessageBox.Yes:
+            
+            rt.setUserProp(rt.rootNode, "UIMakerData", "")
+            
+            max_path = rt.maxFilePath
+            max_name = rt.maxFileName
+            
+            if max_path and max_name:
+                full_path = os.path.join(max_path, max_name)
+                rt.saveMaxFile(full_path, clearNeedSaveFlag=True, useNewFile=False, quiet=True)
+                QtWidgets.QMessageBox.information(self, "Cleared", "UI data successfully removed and Max file saved.")
+            else:
+                rt.setSaveRequired(True)
+                QtWidgets.QMessageBox.information(self, "Cleared", "UI data removed from the scene.\nPlease save your Max file (Ctrl+S) to keep these changes.")
     def load_from_scene(self):
         
         import json
@@ -985,6 +1022,7 @@ class UIElementNode(QtWidgets.QWidget):
     def build_content(self):
         if "Slider" in self.elem_type:
             self.ui_widget = QtWidgets.QSlider(QtCore.Qt.Horizontal)
+            self.ui_widget.setStyleSheet(style.SLIDER_STYLE)
             self.content_layout.addWidget(self.ui_widget)
         elif "CheckBox" in self.elem_type:
             self.ui_widget = QtWidgets.QCheckBox() 
