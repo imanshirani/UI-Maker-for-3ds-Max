@@ -1,4 +1,18 @@
 Changlog
+03-20-2026
+
+# 🚀 UI Maker v0.005 (Open Beta)
+
+Version 0.005 introduces highly requested quality-of-life improvements, powerful new multi-select UI elements, and essential bug fixes to ensure your saved data loads flawlessly.
+
+### ✨ New Features
+* Clear Max Data (`🗑️ Clear Max Data`):** Added a new tool specifically for clearing Embedded Scene Data. clean your custom UI layouts directly into the .max file (Base64 encoded).
+  
+### 💅 UI/UX Improvements
+* Redesign Slider: Redesign Slider.
+  
+---
+*Developed by Iman Shirani. Thank you for the continued feedback and bug reports!*
 
 03-20-2026
 
