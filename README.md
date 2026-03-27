@@ -41,8 +41,19 @@ Creating a control panel for a `tyFlow` simulation, or managing scene states, UI
 ### How to Run
 1. Clone or download this repository.
 2. In 3ds Max, go to **Scripting -> Run Script...**
-3. Select the `launcher.py` file from the downloaded folder.
+3. Select the `UImaker.py` file from the downloaded folder.
 4. The UI Maker dockable panel will appear!
+
+or
+
+## 📦 Installation
+
+Installing the plugin is quick and requires no manual setup in 3ds Max.
+
+1. **Unzip** the downloaded package.
+2. **Copy** the `.bundle` folder to the Autodesk Application Plugins directory:
+   ```text
+   C:\ProgramData\Autodesk\ApplicationPlugins
 
 ### Basic Workflow
 1. **Edit Mode (🛠️):** Toggle to Edit Mode. Drag elements from the left Toolbox into the Canvas.
