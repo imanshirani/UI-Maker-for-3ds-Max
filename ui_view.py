@@ -41,7 +41,7 @@ class SettingsDialog(QtWidgets.QDialog):
         lbl_title = QtWidgets.QLabel("UI Maker")
         lbl_title.setStyleSheet(f"font-size: 18px; font-weight: bold; color: {style.COLOR_ACCENT};")
         lbl_title.setAlignment(QtCore.Qt.AlignCenter)
-        lbl_info = QtWidgets.QLabel("Version 0.005 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
+        lbl_info = QtWidgets.QLabel("Version 0.0.06 Beta\nCreated for Custom 3ds Max User Interface\nDeveloped by Iman Shirani")
         lbl_info.setStyleSheet(style.APP_INFO_LABEL)
         lbl_info.setAlignment(QtCore.Qt.AlignCenter)
         
@@ -467,7 +467,7 @@ class UIMakerWindow(QtWidgets.QDockWidget):
     def get_ui_data(self):
         ui_data = {
             "ui_name": "UI Maker",
-            "version": "0.004", 
+            "version": "0.0.06", 
             "elements": []
         }
         
