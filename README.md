@@ -96,6 +96,6 @@ If this tool saves you hours, consider supporting the development!
 <a href="https://www.paypal.com/donate/?hosted_button_id=LAMNRY6DDWDC4" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal"></a>
 
 
-[![Donate ❤️](https://img.shields.io/badge/Donate-PayPal-00457C?style=flat-square&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=LAMNRY6DDWDC4)
+
 ---
 *Developed with ❤️ by [Iman Shirani] for the 3ds Max Community.*
